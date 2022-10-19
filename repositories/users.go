@@ -6,6 +6,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type repository struct {
+	db *gorm.DB
+}
+
 type UserRepository interface {
 	FindUsers() ([]models.User, error)
 	GetUser(ID int) (models.User, error)
@@ -20,7 +24,7 @@ func RepositoryUser(db *gorm.DB) *repository {
 
 func (r *repository) FindUsers() ([]models.User, error) {
 	var users []models.User
-	err := r.db.Find(&users).Error
+	err := r.db.Preload("Profile").Find(&users).Error
 
 	return users, err
 }
