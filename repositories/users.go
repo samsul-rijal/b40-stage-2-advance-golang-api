@@ -21,7 +21,7 @@ func RepositoryUser(db *gorm.DB) *repository {
 func (r *repository) FindUsers() ([]models.User, error) {
 	var users []models.User
 	// Using Preload("profile") to find data with relation to profile here ..
-	err := r.db.Preload("Profile").Preload("Products").Find(&users).Error // add this code
+	err := r.db.Preload("Profile").Find(&users).Error // add this code
 
 	return users, err
 }
@@ -29,7 +29,7 @@ func (r *repository) FindUsers() ([]models.User, error) {
 func (r *repository) GetUser(ID int) (models.User, error) {
 	var user models.User
 	// Using Preload("profile") to find data with relation to profile here ...
-	err := r.db.Preload("Profile").Preload("Products").First(&user, ID).Error // add this code
+	err := r.db.Preload("Profile").First(&user, ID).Error // add this code
 
 	return user, err
 }
