@@ -7,6 +7,7 @@ import (
 	"dumbmerch/repositories"
 	"encoding/json"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -19,6 +20,7 @@ type handlerProduct struct {
 }
 
 // Create `path_file` Global variable here ...
+// var path_file = "http://localhost:5000/uploads/"
 
 func HandlerProduct(ProductRepository repositories.ProductRepository) *handlerProduct {
 	return &handlerProduct{ProductRepository}
@@ -36,6 +38,9 @@ func (h *handlerProduct) FindProducts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create Embed Path File on Image property here ...
+	for i, p := range products {
+		products[i].Image = os.Getenv("PATH_FILE") + p.Image
+	}
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: http.StatusOK, Data: products}
@@ -57,6 +62,7 @@ func (h *handlerProduct) GetProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create Embed Path File on Image property here ...
+	product.Image = os.Getenv("PATH_FILE") + product.Image
 
 	w.WriteHeader(http.StatusOK)
 	response := dto.SuccessResult{Code: http.StatusOK, Data: convertResponseProduct(product)}
@@ -71,6 +77,8 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	userId := int(userInfo["id"].(float64))
 
 	// Get dataFile from midleware and store to filename variable here ...
+	dataUpload := r.Context().Value("dataFile") // add this code
+	filename := dataUpload.(string)             // add this code
 
 	price, _ := strconv.Atoi(r.FormValue("price"))
 	qty, _ := strconv.Atoi(r.FormValue("qty"))
@@ -103,6 +111,7 @@ func (h *handlerProduct) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	// err := mysql.DB.Create(&product).Error
 	product, err = h.ProductRepository.CreateProduct(product)
+
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := dto.ErrorResult{Code: http.StatusInternalServerError, Message: err.Error()}
